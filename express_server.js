@@ -31,11 +31,20 @@ app.get('/urls', (req, res) => {
 
 app.post('/urls', (req, res) => {
   console.log(req.body);
-  res.send('Ok');
+  let id = generateRandomString();
+  urlDatabase[id] = req.body.longURL;
+  console.log(urlDatabase);
+  res.redirect(`/urls/${id}`);
 })
 
 app.get('/urls/new', (req, res) => {
   res.render('urls_new');
+})
+
+app.get('/u/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
+  res.redirect(longURL);
 })
 
 app.get('/urls/:shortURL', (req, res) => {
