@@ -58,6 +58,14 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   console.log("Hitting route");
 })
 
+app.post('/urls/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = longURL;
+  console.log(urlDatabase);
+  res.redirect('/urls');
+})
+
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
   res.render('urls_show', templateVars);
