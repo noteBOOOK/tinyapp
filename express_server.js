@@ -29,6 +29,20 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+app.get('/urls/new', (req, res) => {
+  res.render('urls_new');
+})
+
+app.get('/u/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.send("")
+  }
+})
+
 app.post('/urls', (req, res) => {
   console.log(req.body);
   let id = generateRandomString();
@@ -37,14 +51,11 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${id}`);
 })
 
-app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
-})
-
-app.get('/u/:shortURL', (req, res) => {
+app.post('/urls/:shortURL/delete', (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
-  res.redirect(longURL);
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
+  console.log("Hitting route");
 })
 
 app.get('/urls/:shortURL', (req, res) => {
