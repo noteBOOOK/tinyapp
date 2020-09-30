@@ -10,6 +10,15 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
+<<<<<<< HEAD
+=======
+    <% if (username) { %>
+      <div><p>Logged in as : <%= username %></p>
+      <p></p><form method="POST" action="/logout"><button>Logout</button></form></p></div>
+    <% } else { %>
+      <form method="POST" action="/login"><p><input type="text" name="username" placeholder="Username"><button>Submit</button>
+    <% } %>
+>>>>>>> feature/cookies
     </p></form>
   </nav>
 </header>
