@@ -79,7 +79,7 @@ app.get('/u/:shortURL', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
-  let randomID = generateRandomString();
+  const randomID = generateRandomString();
   const { email, password } = req.body;
   if (email === "" || password === "") {
     res.status(400);
@@ -89,13 +89,12 @@ app.post('/register', (req, res) => {
     res.status(400);
     res.send("Email Already in Use!")
   } else {
-    const newUser = {
+    users[randomID] = {
       email,
       password,
       id: randomID
     }
-    users[randomID] = newUser;
-    res.cookie("user_id", newUser.id);
+    res.cookie("user_id", randomID);
     console.log(users);
     res.redirect('/urls');
   }
