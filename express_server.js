@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
-const {generateRandomString, checkEmail} = require('./helpers');
+const {generateRandomString, checkEmail, checkPassword} = require('./helpers');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 app.use(bodyParser.urlencoded({extended: true}));
@@ -47,7 +47,8 @@ app.get('/login', (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
   const templateVars = {
-    user
+    user,
+    error: null
   }
   res.render('urls_login', templateVars)
 })
@@ -129,9 +130,24 @@ app.post('/urls/:shortURL', (req, res) => {
 })
 
 app.post('/login', (req, res) => {
-  console.log(req.body);
-  res.cookie('user_id', req.body.userID);
-  res.redirect('/urls');
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
+  const templateVars = {
+    user,
+    error: "Failed Login Attempt!"
+  }
+  const {email, password} = req.body;
+  if (checkEmail(users, email)) {
+    if (checkPassword(users, email, password)) {
+      res.cookie('user_id', checkPassword(users, email, password));
+      res.redirect('/urls');
+    } else {
+      res.status(403);
+      res.render('urls_login', templateVars);
+    }
+  }
+  res.status(403);
+  res.render('urls_login', templateVars);
 })
 
 app.post('/logout', (req, res) => {

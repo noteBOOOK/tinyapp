@@ -13,4 +13,18 @@ const checkEmail = function (userDatabase, email) {
   return null;
 };
 
-module.exports = {generateRandomString, checkEmail};
+const checkPassword = function (userDatabase, email, password) {
+  let result = '';
+  for (const user in userDatabase) {
+    const currentUser = userDatabase[user];
+    if (currentUser.email === email) {
+      if (currentUser.password === password) {
+        result = currentUser.id;
+        return result;
+      }
+    }
+  }
+  return null;
+}
+
+module.exports = {generateRandomString, checkEmail, checkPassword};
