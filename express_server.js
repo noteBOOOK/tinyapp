@@ -141,13 +141,15 @@ app.post('/login', (req, res) => {
     if (checkPassword(users, email, password)) {
       res.cookie('user_id', checkPassword(users, email, password));
       res.redirect('/urls');
+      res.end();
     } else {
       res.status(403);
       res.render('urls_login', templateVars);
     }
+  } else {
+    res.status(403);
+    res.render('urls_login', templateVars);
   }
-  res.status(403);
-  res.render('urls_login', templateVars);
 })
 
 app.post('/logout', (req, res) => {
