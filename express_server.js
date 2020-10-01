@@ -114,7 +114,6 @@ app.post('/register', (req, res) => {
       id: randomID
     }
     req.session["user_id"] = randomID;
-    console.log(users);
     res.redirect('/urls');
   }
 })
