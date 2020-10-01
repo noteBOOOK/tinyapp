@@ -4,6 +4,9 @@ const PORT = 8080;
 const {generateRandomString, checkEmail, checkPassword, urlsForUser} = require('./helpers');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
+
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
@@ -14,12 +17,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple"
+    password: bcrypt.hashSync("purple", 10)
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher"
+    password: bcrypt.hashSync("dishwasher", 10)
   }
 };
 
@@ -89,6 +92,7 @@ app.get('/urls/new', (req, res) => {
 app.post('/register', (req, res) => {
   const randomID = generateRandomString();
   const { email, password } = req.body;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   if (email === "" || password === "") {
     res.status(400);
     res.send("Registration Failed: Please Try Again");
@@ -99,7 +103,7 @@ app.post('/register', (req, res) => {
   } else {
     users[randomID] = {
       email,
-      password,
+      password: hashedPassword,
       id: randomID
     }
     res.cookie("user_id", randomID);
@@ -151,20 +155,21 @@ app.post('/urls/:shortURL', (req, res) => {
 app.post('/login', (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
+  const {email, password} = req.body;
   const templateVars = {
     user,
     error: "Failed Login Attempt!"
   }
-  const {email, password} = req.body;
-  if (checkEmail(users, email)) {
-    if (checkPassword(users, email, password)) {
-      res.cookie('user_id', checkPassword(users, email, password));
+  console.log(checkEmail(users, email));
+  if (checkEmail(users, email) !== null) {
+    currentUser = checkEmail(users, email);
+    if (bcrypt.compareSync(password, users[currentUser].password)) {
+      res.cookie('user_id', currentUser);
       res.redirect('/urls');
     }
-  } else {
-    res.status(403);
-    res.render('urls_login', templateVars);
-  }
+  } 
+  res.status(403);
+  res.render('urls_login', templateVars);
 })
 
 // POST request route to logout
