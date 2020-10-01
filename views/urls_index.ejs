@@ -13,6 +13,9 @@
     <%- include('partials/_header') %>
   <main style="margin: 1em;">
     <h3>My URLs</h3>
+    <% if (typeof user === "undefined") { %>
+      <h5>Please Register or Login</h5>
+    <% } else { %>
     <table class="table">
       <thead>
         <tr>
@@ -35,7 +38,7 @@
           </tr>
         <% } %>
       </tbody>
-
+      <% } %>
     </table>
   </main>
   <!-- Bootstrap JS -->
