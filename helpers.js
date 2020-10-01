@@ -1,4 +1,4 @@
-function generateRandomString() {
+const generateRandomString = () => {
   let randomString = Math.random().toString(36).substring(2,8);
   return randomString;
 };
@@ -15,10 +15,10 @@ const getUserByEmail = (userDatabase, email) => {
 
 const urlsForUser = (urlDatabase, user) => {
   const result = {};
-  for (const url in urlDatabase) {                       
+  for (const url in urlDatabase) {
     const currentURL = urlDatabase[url];
     if (currentURL.userID === user) {
-      result[url] = {longURL: currentURL.longURL}
+      result[url] = {longURL: currentURL.longURL};
     }
   }
   return result;
