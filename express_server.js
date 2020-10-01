@@ -24,14 +24,19 @@ const users = {
 };
 
 const urlDatabase = {
-  'b2xVn2': "http://www.lighthouselabs.ca",
-  '9sm5xK': "http://www.google.com"
+  'b2xVn2': {longURL: "http://www.lighthouselabs.ca", userID: "userRandomID"},
+  '9sm5xK': {longURL: "http://www.google.com", userID: "user2RandomID"}
 };
 ////////////////////////////////////////////////////////////
 
 
+
 app.get('/', (req, res) => {
   res.send('Hello!');
+});
+
+app.get('/urls.json', (req, res) => {
+  res.json(urlDatabase);
 });
 
 app.get('/register', (req, res) => {
@@ -53,15 +58,10 @@ app.get('/login', (req, res) => {
   res.render('urls_login', templateVars)
 })
 
-app.get('/urls.json', (req, res) => {
-  res.json(urlDatabase);
-});
 
 app.get('/urls', (req, res) => {
   const userID = req.cookies["user_id"];
-  // console.log(userID);
   const user = users[userID];
-  // console.log(user);
   const templateVars = { 
     user,
     urls: urlDatabase
@@ -71,16 +71,20 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   const userID = req.cookies["user_id"];
-  const user = users[userID];
-  const templateVars = { 
-    user
-  };
-  res.render('urls_new', templateVars);
+  if (users[userID]) {
+    const user = users[userID];
+    const templateVars = { 
+      user
+    };
+    res.render('urls_new', templateVars);
+  } else {
+    res.redirect('/login');
+  }
 })
 
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase.shortURL.longURL;
   if (longURL) {
     res.redirect(longURL);
   } else {
@@ -112,7 +116,12 @@ app.post('/register', (req, res) => {
 
 app.post('/urls', (req, res) => {
   let id = generateRandomString();
-  urlDatabase[id] = req.body.longURL;
+  const userID = req.cookies["user_id"];
+  urlDatabase[id] = {
+    longURL: req.body.longURL,
+    userID,
+  };
+  console.log("database:", urlDatabase);
   res.redirect(`/urls/${id}`);
 })
 
@@ -141,7 +150,6 @@ app.post('/login', (req, res) => {
     if (checkPassword(users, email, password)) {
       res.cookie('user_id', checkPassword(users, email, password));
       res.redirect('/urls');
-      res.end();
     } else {
       res.status(403);
       res.render('urls_login', templateVars);
@@ -160,10 +168,11 @@ app.post('/logout', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
+  const shortURL = req.params.shortURL;
   const templateVars = { 
     user,
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL]
+    shortURL,
+    longURL: urlDatabase[shortURL].longURL
   };
   res.render('urls_show', templateVars);
 });
