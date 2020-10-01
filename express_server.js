@@ -35,13 +35,17 @@ const urlDatabase = {
 ////////////////////////////////////////////////////////////
 
 
-
-app.get('/', (req, res) => {
-  res.send('Hello!');
-});
-
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
+});
+
+app.get('/', (req, res) => {
+  const userID = req.session["user_id"];
+  if (users[userID]) {
+    res.redirect('/urls')
+  } else {
+    res.redirect('/login');
+  }
 });
 
 // GET request route for register page
@@ -163,6 +167,7 @@ app.post('/login', (req, res) => {
     user,
     error: "Failed Login Attempt!"
   }
+
   if (getUserByEmail(users, email) !== null) {
     currentUser = getUserByEmail(users, email);
     if (bcrypt.compareSync(password, users[currentUser].password)) {
