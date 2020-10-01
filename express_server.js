@@ -3,12 +3,16 @@ const app = express();
 const PORT = 8080;
 const {generateRandomString, checkEmail, checkPassword, urlsForUser} = require('./helpers');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
+const cookieParser = require('cookie-parser'); //
 const bcrypt = require('bcrypt');
 
-
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}));
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+app.use(cookieParser()); //
 
 app.set('view engine', 'ejs');
 
@@ -44,7 +48,7 @@ app.get('/urls.json', (req, res) => {
 
 // GET request route for register page
 app.get('/register', (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   const templateVars = {
     user
@@ -54,7 +58,7 @@ app.get('/register', (req, res) => {
 
 // GET request route for login page
 app.get('/login', (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   const templateVars = {
     user,
@@ -65,7 +69,7 @@ app.get('/login', (req, res) => {
 
 // GET request route to show all URL page
 app.get('/urls', (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   const templateVars = { 
     user,
@@ -76,7 +80,7 @@ app.get('/urls', (req, res) => {
 
 // GET request route to add new URL page
 app.get('/urls/new', (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   if (users[userID]) {
     const user = users[userID];
     const templateVars = { 
@@ -93,6 +97,7 @@ app.post('/register', (req, res) => {
   const randomID = generateRandomString();
   const { email, password } = req.body;
   const hashedPassword = bcrypt.hashSync(password, 10);
+
   if (email === "" || password === "") {
     res.status(400);
     res.send("Registration Failed: Please Try Again");
@@ -106,7 +111,7 @@ app.post('/register', (req, res) => {
       password: hashedPassword,
       id: randomID
     }
-    res.cookie("user_id", randomID);
+    req.session["user_id"] = randomID;
     console.log(users);
     res.redirect('/urls');
   }
@@ -115,7 +120,7 @@ app.post('/register', (req, res) => {
 // POST request route to add new URL
 app.post('/urls', (req, res) => {
   let id = generateRandomString();
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   urlDatabase[id] = {
     longURL: req.body.longURL,
     userID,
@@ -125,7 +130,7 @@ app.post('/urls', (req, res) => {
 
 // POST request route to delete URL
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const shortURL = req.params.shortURL;
   if (urlDatabase[shortURL].userID === userID) {
     delete urlDatabase[shortURL];
@@ -140,7 +145,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.post('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
 
   if (urlDatabase[shortURL].userID === userID) {
     urlDatabase[shortURL] = {longURL, userID: userID}
@@ -153,18 +158,17 @@ app.post('/urls/:shortURL', (req, res) => {
 
 // POST request route to login
 app.post('/login', (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   const {email, password} = req.body;
   const templateVars = {
     user,
     error: "Failed Login Attempt!"
   }
-  console.log(checkEmail(users, email));
   if (checkEmail(users, email) !== null) {
     currentUser = checkEmail(users, email);
     if (bcrypt.compareSync(password, users[currentUser].password)) {
-      res.cookie('user_id', currentUser);
+      req.session['user_id'] = currentUser;
       res.redirect('/urls');
     }
   } 
@@ -174,7 +178,7 @@ app.post('/login', (req, res) => {
 
 // POST request route to logout
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/urls');
 })
 
@@ -191,7 +195,7 @@ app.get('/u/:shortURL', (req, res) => {
 
 // GET request route to show each URL
 app.get('/urls/:shortURL', (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   const shortURL = req.params.shortURL;
   const templateVars = { 
