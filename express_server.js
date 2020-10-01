@@ -39,6 +39,7 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
+// GET request route for register page
 app.get('/register', (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
@@ -48,6 +49,7 @@ app.get('/register', (req, res) => {
   res.render('urls_register', templateVars);
 });
 
+// GET request route for login page
 app.get('/login', (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
@@ -58,7 +60,7 @@ app.get('/login', (req, res) => {
   res.render('urls_login', templateVars)
 })
 
-
+// GET request route to show all URL page
 app.get('/urls', (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
@@ -69,6 +71,7 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+// GET request route to add new URL page
 app.get('/urls/new', (req, res) => {
   const userID = req.cookies["user_id"];
   if (users[userID]) {
@@ -82,7 +85,7 @@ app.get('/urls/new', (req, res) => {
   }
 })
 
-
+// POST request route to register new user
 app.post('/register', (req, res) => {
   const randomID = generateRandomString();
   const { email, password } = req.body;
@@ -105,6 +108,7 @@ app.post('/register', (req, res) => {
   }
 })
 
+// POST request route to add new URL
 app.post('/urls', (req, res) => {
   let id = generateRandomString();
   const userID = req.cookies["user_id"];
@@ -115,6 +119,7 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${id}`);
 })
 
+// POST request route to delete URL
 app.post('/urls/:shortURL/delete', (req, res) => {
   const userID = req.cookies["user_id"];
   const shortURL = req.params.shortURL;
@@ -127,6 +132,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   }
 })
 
+// POST request route to edit URL
 app.post('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
@@ -141,6 +147,7 @@ app.post('/urls/:shortURL', (req, res) => {
   }
 })
 
+// POST request route to login
 app.post('/login', (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
@@ -160,11 +167,13 @@ app.post('/login', (req, res) => {
   }
 })
 
+// POST request route to logout
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/urls');
 })
 
+// GET request route to redirect to long URL
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
@@ -175,6 +184,7 @@ app.get('/u/:shortURL', (req, res) => {
   }
 })
 
+// GET request route to show each URL
 app.get('/urls/:shortURL', (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
@@ -186,10 +196,6 @@ app.get('/urls/:shortURL', (req, res) => {
     url: Object.keys(urlsForUser(urlDatabase, userID))
   };
   res.render('urls_show', templateVars);
-});
-
-app.get('/hello', (req, res) => {
-  res.send('<html><body>Hello <b>World</b></body></html>\n');
 });
 
 app.listen(PORT, () => {
