@@ -23,7 +23,6 @@ const testURLS = {
 
 
 
-
 describe("generateRandomString", function() {
   it("Should return a string", function() {
     const string = generateRandomString();
@@ -31,7 +30,7 @@ describe("generateRandomString", function() {
     const expectedOutput = "string";
     assert.equal(result, expectedOutput);
   });
-
+  
   it("Should be 6 characters long", function() {
     const string = generateRandomString();
     assert.equal(string.length, 6);
@@ -51,7 +50,7 @@ describe("getUserByEmail", function() {
     const expectedOutput = "user2RandomID";
     assert.equal(user, expectedOutput);
   });
-
+  
   it("Should return null with invalid email", function() {
     const user = getUserByEmail(testUser, "hello@hello.com");
     const expectedOutput = null;
@@ -60,4 +59,22 @@ describe("getUserByEmail", function() {
 });
 
 
+describe("urlsForUser", function() {
+  it("Should return URL object for user of the URL", function() {
+    const result = urlsForUser(testURLS, "userRandomID");
+    const expectedOutput = {'b2xVn2': {longURL: "http://www.lighthouselabs.ca"}}
+    assert.deepEqual(result, expectedOutput);
+  });
 
+  it("Should return URL object for other user", function() {
+    const result = urlsForUser(testURLS, "user2RandomID");
+    const expectedOutput = {'9sm5xK': {longURL: "http://www.google.com"}};
+    assert.deepEqual(result, expectedOutput);
+  });
+
+  it("Should return an empty object if not a user", function() {
+    const result = urlsForUser(testURLS, "hello");
+    const expectedOutput = {};
+    assert.deepEqual(result, expectedOutput);
+  });
+});
