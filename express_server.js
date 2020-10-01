@@ -4,7 +4,6 @@ const PORT = 8080;
 const {generateRandomString, getUserByEmail, urlsForUser} = require('./helpers');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
-const cookieParser = require('cookie-parser'); //
 const bcrypt = require('bcrypt');
 
 app.use(cookieSession({
@@ -12,7 +11,6 @@ app.use(cookieSession({
   keys: ['key1', 'key2']
 }));
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser()); //
 
 app.set('view engine', 'ejs');
 
@@ -171,7 +169,7 @@ app.post('/login', (req, res) => {
       req.session['user_id'] = currentUser;
       return res.redirect('/urls');
     }
-  } 
+  }
   res.status(403);
   res.render('urls_login', templateVars);
 })
