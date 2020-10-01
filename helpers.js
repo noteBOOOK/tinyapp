@@ -3,7 +3,7 @@ function generateRandomString() {
   return randomString;
 };
 
-const checkEmail = (userDatabase, email) => {
+const getUserByEmail = (userDatabase, email) => {
   for (const user in userDatabase) {
     const currentUser = userDatabase[user];
     if (currentUser.email === email) {
@@ -12,20 +12,6 @@ const checkEmail = (userDatabase, email) => {
   }
   return null;
 };
-
-const checkPassword = (userDatabase, email, password) => {
-  let result = '';
-  for (const user in userDatabase) {
-    const currentUser = userDatabase[user];
-    if (currentUser.email === email) {
-      if (currentUser.password === password) {
-        result = currentUser.id;
-        return result;
-      }
-    }
-  }
-  return null;
-}
 
 const urlsForUser = (urlDatabase, user) => {
   const result = {};
@@ -38,4 +24,4 @@ const urlsForUser = (urlDatabase, user) => {
   return result;
 };
 
-module.exports = {generateRandomString, checkEmail, checkPassword, urlsForUser};
+module.exports = {generateRandomString, getUserByEmail, urlsForUser};

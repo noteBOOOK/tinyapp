@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
-const {generateRandomString, checkEmail, checkPassword, urlsForUser} = require('./helpers');
+const {generateRandomString, getUserByEmail, urlsForUser} = require('./helpers');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const cookieParser = require('cookie-parser'); //
@@ -102,7 +102,7 @@ app.post('/register', (req, res) => {
     res.status(400);
     res.send("Registration Failed: Please Try Again");
     return;
-  } else if (checkEmail(users, email)) {
+  } else if (getUserByEmail(users, email)) {
     res.status(400);
     res.send("Email Already in Use!")
   } else {
@@ -165,8 +165,8 @@ app.post('/login', (req, res) => {
     user,
     error: "Failed Login Attempt!"
   }
-  if (checkEmail(users, email) !== null) {
-    currentUser = checkEmail(users, email);
+  if (getUserByEmail(users, email) !== null) {
+    currentUser = getUserByEmail(users, email);
     if (bcrypt.compareSync(password, users[currentUser].password)) {
       req.session['user_id'] = currentUser;
       res.redirect('/urls');
