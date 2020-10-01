@@ -15,7 +15,8 @@
     <% if (typeof user === "undefined") { %>
       <h5>Please Register or Login</h5>
     <% } else if (!url.includes(shortURL)) { %>
-      <h5>This URL does not belong to you!</h5>
+      <h5>Something went wrong!</h5> 
+      <h6>This URL either doesn't exist or belongs to another user!</h6>
     <% } else { %>
     <div class="card-body">
       <h5 class="card-title">TinyURL for: <%= longURL %></h5>

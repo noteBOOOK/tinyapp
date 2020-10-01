@@ -52,21 +52,30 @@ app.get('/', (req, res) => {
 app.get('/register', (req, res) => {
   const userID = req.session["user_id"];
   const user = users[userID];
-  const templateVars = {
-    user
+  if (user) {
+    res.redirect('urls');
+  } else {
+    const templateVars = {
+      user,
+      error: null
+    }
+    res.render('urls_register', templateVars);
   }
-  res.render('urls_register', templateVars);
 });
 
 // GET request route for login page
 app.get('/login', (req, res) => {
   const userID = req.session["user_id"];
   const user = users[userID];
-  const templateVars = {
-    user,
-    error: null
+  if (user) {
+    res.redirect('urls');
+  } else {
+    const templateVars = {
+      user,
+      error: null
+    }
+    res.render('urls_login', templateVars);
   }
-  res.render('urls_login', templateVars)
 })
 
 // GET request route to show all URL page
@@ -90,7 +99,7 @@ app.get('/urls/new', (req, res) => {
     };
     res.render('urls_new', templateVars);
   } else {
-    res.redirect('/login');
+    res.redirect('login');
   }
 })
 
@@ -99,14 +108,22 @@ app.post('/register', (req, res) => {
   const randomID = generateRandomString();
   const { email, password } = req.body;
   const hashedPassword = bcrypt.hashSync(password, 10);
+  const userID = req.session["user_id"];
+  const user = users[userID];
+  const templateVars = {
+    user
+  }
 
   if (email === "" || password === "") {
     res.status(400);
-    res.send("Registration Failed: Please Try Again");
-    return;
+    templateVars.error = "Failed Registration Attempt!";
+    return res.render('urls_register', templateVars);
+
   } else if (getUserByEmail(users, email)) {
     res.status(400);
-    res.send("Email Already in Use!")
+    templateVars.error = "Email Already in Use!";
+    return res.render('urls_register', templateVars);
+
   } else {
     users[randomID] = {
       email,
@@ -114,19 +131,24 @@ app.post('/register', (req, res) => {
       id: randomID
     }
     req.session["user_id"] = randomID;
-    res.redirect('/urls');
+    res.redirect('urls');
   }
 })
 
 // POST request route to add new URL
 app.post('/urls', (req, res) => {
-  let id = generateRandomString();
   const userID = req.session["user_id"];
-  urlDatabase[id] = {
-    longURL: req.body.longURL,
-    userID,
-  };
-  res.redirect(`/urls/${id}`);
+  if (!users[userID]) {
+    res.status(403);
+    res.send("You must be logged in to create URLs!")
+  } else {
+    let id = generateRandomString();
+    urlDatabase[id] = {
+      longURL: req.body.longURL,
+      userID,
+    };
+    res.redirect(`urls/${id}`);
+  }
 })
 
 // POST request route to delete URL
@@ -146,10 +168,12 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.post('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
+  console.log(longURL);
   const userID = req.session["user_id"];
 
   if (urlDatabase[shortURL].userID === userID) {
-    urlDatabase[shortURL] = {longURL, userID: userID}
+    urlDatabase[shortURL] = {longURL: `http://${longURL}`, userID: userID}
+    console.log(urlDatabase);
     res.redirect('/urls');
   } else {
     res.status(403);
@@ -171,7 +195,7 @@ app.post('/login', (req, res) => {
     currentUser = getUserByEmail(users, email);
     if (bcrypt.compareSync(password, users[currentUser].password)) {
       req.session['user_id'] = currentUser;
-      return res.redirect('/urls');
+      return res.redirect('urls');
     }
   }
   res.status(403);
@@ -181,15 +205,19 @@ app.post('/login', (req, res) => {
 // POST request route to logout
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect('/urls');
+  res.redirect('urls');
 })
 
 // GET request route to redirect to long URL
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
+  if (!urlDatabase[shortURL]){
+    res.status(404)
+    return res.send("URL cannot be found!");
+  }
   const longURL = urlDatabase[shortURL].longURL;
   if (longURL) {
-    res.redirect(`http://${longURL}`);
+    res.redirect(longURL);
   } else {
     res.send("")
   }
@@ -200,13 +228,23 @@ app.get('/urls/:shortURL', (req, res) => {
   const userID = req.session["user_id"];
   const user = users[userID];
   const shortURL = req.params.shortURL;
-  const templateVars = { 
-    user,
-    shortURL,
-    longURL: urlDatabase[shortURL].longURL,
-    url: Object.keys(urlsForUser(urlDatabase, userID))
-  };
-  res.render('urls_show', templateVars);
+  if (urlDatabase[shortURL]){
+    const templateVars = { 
+      user,
+      shortURL,
+      longURL: urlDatabase[shortURL].longURL,
+      url: Object.keys(urlsForUser(urlDatabase, userID)),
+    }
+    res.render('urls_show', templateVars);
+  } else {
+    const templateVars = {
+      user,
+      shortURL: {},
+      longURL: {},
+      url: [],
+    }
+    res.render('urls_show', templateVars);
+  }
 });
 
 app.listen(PORT, () => {
