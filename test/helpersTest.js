@@ -4,13 +4,13 @@ const { getUserByEmail, generateRandomString, urlsForUser } = require("../helper
 
 const testUser = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
   "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
@@ -18,7 +18,7 @@ const testUser = {
 const testURLS = {
   'b2xVn2': {longURL: "http://www.lighthouselabs.ca", userID:"userRandomID"},
   '9sm5xK': {longURL: "http://www.google.com", userID:"user2RandomID"}
-}
+};
 
 
 
@@ -62,7 +62,7 @@ describe("getUserByEmail", function() {
 describe("urlsForUser", function() {
   it("Should return URL object for user of the URL", function() {
     const result = urlsForUser(testURLS, "userRandomID");
-    const expectedOutput = {'b2xVn2': {longURL: "http://www.lighthouselabs.ca"}}
+    const expectedOutput = {'b2xVn2': {longURL: "http://www.lighthouselabs.ca"}};
     assert.deepEqual(result, expectedOutput);
   });
 
