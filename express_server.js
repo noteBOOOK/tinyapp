@@ -82,15 +82,6 @@ app.get('/urls/new', (req, res) => {
   }
 })
 
-app.get('/u/:shortURL', (req, res) => {
-  const shortURL = req.params.shortURL;
-  const longURL = urlDatabase.shortURL.longURL;
-  if (longURL) {
-    res.redirect(longURL);
-  } else {
-    res.send("")
-  }
-})
 
 app.post('/register', (req, res) => {
   const randomID = generateRandomString();
@@ -163,6 +154,18 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/urls');
+})
+
+app.get('/u/:shortURL', (req, res) => {
+  console.log(urlDatabase);
+  const shortURL = req.params.shortURL;
+  console.log(shortURL);
+  const longURL = urlDatabase[shortURL].longURL;
+  if (longURL) {
+    res.redirect(`http://${longURL}`);
+  } else {
+    res.send("")
+  }
 })
 
 app.get('/urls/:shortURL', (req, res) => {
