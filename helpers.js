@@ -7,7 +7,7 @@ const checkEmail = (userDatabase, email) => {
   for (const user in userDatabase) {
     const currentUser = userDatabase[user];
     if (currentUser.email === email) {
-      return true;
+      return user;
     }
   }
   return null;
@@ -29,7 +29,7 @@ const checkPassword = (userDatabase, email, password) => {
 
 const urlsForUser = (urlDatabase, user) => {
   const result = {};
-  for (const url in urlDatabase) {
+  for (const url in urlDatabase) {                       
     const currentURL = urlDatabase[url];
     if (currentURL.userID === user) {
       result[url] = {longURL: currentURL.longURL}
