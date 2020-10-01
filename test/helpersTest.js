@@ -1,6 +1,6 @@
 const { assert } = require("chai");
 
-const { getUserByEmail } = require("../helpers.js");
+const { getUserByEmail, generateRandomString, urlsForUser } = require("../helpers.js");
 
 const testUser = {
   "userRandomID": {
@@ -14,6 +14,30 @@ const testUser = {
     password: "dishwasher-funk"
   }
 };
+
+const testURLS = {
+  'b2xVn2': {longURL: "http://www.lighthouselabs.ca", userID:"userRandomID"},
+  '9sm5xK': {longURL: "http://www.google.com", userID:"user2RandomID"}
+}
+
+
+
+
+
+describe("generateRandomString", function() {
+  it("Should return a string", function() {
+    const string = generateRandomString();
+    const result = typeof string;
+    const expectedOutput = "string";
+    assert.equal(result, expectedOutput);
+  });
+
+  it("Should be 6 characters long", function() {
+    const string = generateRandomString();
+    assert.equal(string.length, 6);
+  });
+});
+
 
 describe("getUserByEmail", function() {
   it("Should return a user with valid email", function() {
@@ -34,4 +58,6 @@ describe("getUserByEmail", function() {
     assert.equal(user, expectedOutput);
   });
 });
+
+
 
