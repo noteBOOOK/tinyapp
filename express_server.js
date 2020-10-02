@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const {users, urlDatabase} = require("./db/databases");
-const {generateRandomString, getUserByEmail, urlsForUser} = require('./helpers');
+const {generateRandomString, getUserByEmail, urlsForUser, getUserID} = require('./helpers');
 
 app.use(cookieSession({
   name: 'session',
@@ -38,8 +38,7 @@ app.get('/', (req, res) => {
 
 //// GET request route for register page
 app.get('/register', (req, res) => {
-  const userID = req.session['user_id'];
-  const user = users[userID];
+  const user = users[getUserID(req)];
   // If already logged in, redirect to urls page
   if (user) {
     res.redirect('urls');
@@ -57,8 +56,7 @@ app.post('/register', (req, res) => {
   const randomID = generateRandomString();
   const { email, password } = req.body;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  const userID = req.session['user_id'];
-  const user = users[userID];
+  const user = users[getUserID(req)];
   const templateVars = {
     user
   };
@@ -94,8 +92,7 @@ app.post('/register', (req, res) => {
 
 //// GET request route for login page
 app.get('/login', (req, res) => {
-  const userID = req.session['user_id'];
-  const user = users[userID];
+  const user = users[getUserID(req)];
   // If already logged in
   if (user) {
     res.redirect('urls');
@@ -110,8 +107,7 @@ app.get('/login', (req, res) => {
 
 //// POST request route to login
 app.post('/login', (req, res) => {
-  const userID = req.session['user_id'];
-  const user = users[userID];
+  const user = users[getUserID(req)];
   const {email, password} = req.body;
   const templateVars = {
     user,
@@ -142,11 +138,10 @@ app.post('/logout', (req, res) => {
 
 //// GET request route to show all URL page
 app.get('/urls', (req, res) => {
-  const userID = req.session['user_id'];
-  const user = users[userID];
+  const user = users[getUserID(req)];
   const templateVars = {
     user,
-    urls: urlsForUser(urlDatabase, userID)
+    urls: urlsForUser(urlDatabase, getUserID(req))
   };
   res.render('urls_index', templateVars);
 });
@@ -161,7 +156,7 @@ app.post('/urls', (req, res) => {
   } else {
     let id = generateRandomString();
     urlDatabase[id] = {
-      longURL: req.body.longURL,
+      longURL: `http://${req.body.longURL}`,
       userID,
     };
     res.redirect(`urls/${id}`);
@@ -199,8 +194,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 //// GET request route to show each URL
 app.get('/urls/:shortURL', (req, res) => {
-  const userID = req.session['user_id'];
-  const user = users[userID];
+  const user = users[getUserID(req)];
   const shortURL = req.params.shortURL;
   // If url is in url database
   if (urlDatabase[shortURL]) {
@@ -208,7 +202,7 @@ app.get('/urls/:shortURL', (req, res) => {
       user,
       shortURL,
       longURL: urlDatabase[shortURL].longURL,
-      url: Object.keys(urlsForUser(urlDatabase, userID))
+      url: Object.keys(urlsForUser(urlDatabase, getUserID(req)))
     };
     res.render('urls_show', templateVars);
   } else {
@@ -246,7 +240,7 @@ app.get('/u/:shortURL', (req, res) => {
     res.status(404);
     return res.send('URL cannot be found!');
   }
-  
+
   const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
